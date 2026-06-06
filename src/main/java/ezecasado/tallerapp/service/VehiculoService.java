@@ -79,6 +79,20 @@ public class VehiculoService {
     }
 
 
+    public void eliminarVehiculo(Long vehiculoId){
+
+        Vehiculo vehiculo = vehiculoRepository.findById(vehiculoId)
+                .orElseThrow(() -> new RuntimeException("Vehiculo no encontrado con el id" + vehiculoId));
+
+        vehiculo.setActivo(false);
+
+
+        vehiculoRepository.save(vehiculo);
+
+
+    }
+
+
     public List<Vehiculo> listarVehiculosActivos(){
         return vehiculoRepository.findByActivo(true);
     }
