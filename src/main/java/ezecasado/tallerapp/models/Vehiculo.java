@@ -117,4 +117,8 @@ public class Vehiculo {
     public void setPatente(String patente) {
         this.patente = patente;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

@@ -82,4 +82,9 @@ public class Cliente {
     public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
+
+    public void setId(Long id) {
+
+        this.id = id;
+    }
 }

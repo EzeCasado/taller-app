@@ -16,4 +16,5 @@ public interface ModificacionRepository extends JpaRepository<Modificacion,Long>
     @Query("SELECT SUM(mo.costo) FROM Modificacion mo where mo.vehiculo.id = :idDelVehiculo")
     BigDecimal sumarCostoTotalModificacion(@Param("idDelVehiculo")  Long vehiculoId);
 
+    List<Modificacion> findByActiva(boolean activa);
 }

@@ -43,7 +43,18 @@ public class MantenimientoService {
 
     }
 
+    public void eliminarMantenimiento(Long id){
 
+        Mantenimiento mantenimiento = mantenimientoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No existe el mantenimiento con el id: " + id));
+
+
+        mantenimiento.setActivo(false);
+
+        mantenimientoRepository.save(mantenimiento);
+
+
+    }
 
 
 }
