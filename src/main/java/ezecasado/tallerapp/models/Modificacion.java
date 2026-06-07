@@ -104,4 +104,8 @@ public class Modificacion {
     public void setVehiculo(Vehiculo vehiculo) {
         this.vehiculo = vehiculo;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }
