@@ -1,0 +1,66 @@
+= 🛠️ API Taller Mecánico - Documentación Oficial
+Ezequiel & Máximo <analistas@sistemas.com>
+:toc: left
+:toclevels: 3
+:sectnums:
+
+A continuación se detalla el catálogo de endpoints disponibles para el sistema de gestión del taller, generados automáticamente a partir de los tests de integración.
+
+== 👥 Módulo de Clientes
+
+=== Listar Clientes
+Muestra la lista de todos los clientes registrados en el sistema.
+
+==== Petición HTTP
+include::{snippets}/listar-clientes/http-request.adoc[]
+
+==== Respuesta HTTP
+include::{snippets}/listar-clientes/http-response.adoc[]
+
+
+== 🪪 Módulo de Empleados
+
+=== Crear Empleado
+Registra un nuevo mecánico o administrativo en la plataforma.
+
+==== Petición HTTP
+include::{snippets}/crear-empleado/http-request.adoc[]
+
+==== Respuesta HTTP
+include::{snippets}/crear-empleado/http-response.adoc[]
+
+
+== 🚗 Módulo de Vehículos
+
+=== Listar Vehículos
+Devuelve el listado de todos los autos ingresados en el taller con sus respectivos motores y clientes asociados.
+
+==== Petición HTTP
+include::{snippets}/listar-vehiculos/http-request.adoc[]
+
+==== Respuesta HTTP
+include::{snippets}/listar-vehiculos/http-response.adoc[]
+
+
+== 🔧 Módulo de Mantenimientos
+
+=== Registrar Mantenimiento
+Carga una nueva orden de servicio (cambios de aceite, frenos, distribución) asignándole un mecánico y un auto.
+
+==== Petición HTTP
+include::{snippets}/registrar-mantenimiento/http-request.adoc[]
+
+==== Respuesta HTTP
+include::{snippets}/registrar-mantenimiento/http-response.adoc[]
+
+
+== 🏎️ Módulo de Modificaciones
+
+=== Listar Modificaciones
+Muestra las mejoras o agregados estéticos/mecánicos realizados en los vehículos (escapes, suspensiones, pantallas).
+
+==== Petición HTTP
+include::{snippets}/listar-modificaciones/http-request.adoc[]
+
+==== Respuesta HTTP
+include::{snippets}/listar-modificaciones/http-response.adoc[]
