@@ -37,6 +37,30 @@ public class ClienteService {
 
    }
 
+   public void eliminarCliente(Long idCliente){
 
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado con el id: " + idCliente));
+
+
+        cliente.setActivo(false);
+
+        clienteRepository.save(cliente);
+
+   }
+
+   public Cliente buscarCliente(Long idCliente){
+
+        return clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado con el id: " + idCliente));
+
+   }
+
+
+   public Cliente actualizarCliente(Cliente cliente) {
+
+       return clienteRepository.save(cliente);
+
+   }
 
 }
