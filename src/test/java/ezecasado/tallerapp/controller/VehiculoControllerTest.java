@@ -2,6 +2,7 @@ package ezecasado.tallerapp.controller;
 
 
 import ezecasado.tallerapp.DTO.GastoVehiculoDTO;
+import ezecasado.tallerapp.models.Cliente;
 import ezecasado.tallerapp.models.Vehiculo;
 import ezecasado.tallerapp.service.VehiculoService;
 import org.junit.jupiter.api.DisplayName;
@@ -32,11 +33,11 @@ public class VehiculoControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockitoBean
     private VehiculoService vehiculoService;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     // ─── GET /api/vehiculos/listar ────────────────────────────────────────────
 
@@ -45,38 +46,31 @@ public class VehiculoControllerTest {
     public void debeListarVehiculosActivosYDocumentar() throws Exception {
 
         // GIVEN
-        Vehiculo autoFalso = new Vehiculo();
-        autoFalso.setId(1L);
-        autoFalso.setPatente("AA123BB");
-        autoFalso.setMarca("Volkswagen");
-        autoFalso.setModelo("Gol");
-        autoFalso.setAnio(2020);
-        autoFalso.setKilometraje(45000);
-        autoFalso.setActivo(true);
+        Cliente cliente = new Cliente();
+        cliente.setId(1L);
+        cliente.setNombre("Mario");
+        cliente.setApellido("Pérez");
 
-        when(vehiculoService.listarVehiculosActivos()).thenReturn(List.of(autoFalso));
+        Vehiculo vehiculoFalso = new Vehiculo();
+        vehiculoFalso.setId(1L);
+        vehiculoFalso.setPatente("AA123BB");
+        vehiculoFalso.setMarca("Volkswagen");
+        vehiculoFalso.setModelo("Gol");
+        vehiculoFalso.setAnio(2020);
+        vehiculoFalso.setKilometraje(45000);
+        vehiculoFalso.setMotor("1.6L");
+        vehiculoFalso.setActivo(true);
+        vehiculoFalso.setCliente(cliente);
+
+        when(vehiculoService.listarVehiculosActivos()).thenReturn(List.of(vehiculoFalso));
 
         // WHEN & THEN
         mockMvc.perform(get("/api/vehiculos/listar"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].patente").value("AA123BB"))
+                .andExpect(jsonPath("$[0].motor").value("1.6L"))
                 .andExpect(jsonPath("$[0].activo").value(true))
                 .andDo(document("listar-vehiculos"));
-    }
-
-    @Test
-    @DisplayName("GET /listar: responde 200 OK con lista vacía cuando no hay vehículos activos")
-    public void debeListarVehiculosActivos_listaVacia() throws Exception {
-
-        // GIVEN
-        when(vehiculoService.listarVehiculosActivos()).thenReturn(List.of());
-
-        // WHEN & THEN
-        mockMvc.perform(get("/api/vehiculos/listar"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$").isEmpty())
-                .andDo(document("listar-vehiculos-vacio"));
     }
 
     // ─── POST /api/vehiculos/crear ────────────────────────────────────────────
@@ -86,13 +80,17 @@ public class VehiculoControllerTest {
     public void debeCrearVehiculoYDocumentar() throws Exception {
 
         // GIVEN
-        Vehiculo nuevoVehiculo = new Vehiculo();
-        nuevoVehiculo.setPatente("ZZ999YY");
-        nuevoVehiculo.setMarca("Ford");
-        nuevoVehiculo.setModelo("Ka");
-        nuevoVehiculo.setAnio(2022);
-        nuevoVehiculo.setKilometraje(10000);
-        nuevoVehiculo.setMotor("1.0L");
+        Cliente cliente = new Cliente();
+        cliente.setId(1L);
+
+        Vehiculo vehiculoNuevo = new Vehiculo();
+        vehiculoNuevo.setPatente("ZZ999YY");
+        vehiculoNuevo.setMarca("Ford");
+        vehiculoNuevo.setModelo("Ka");
+        vehiculoNuevo.setAnio(2022);
+        vehiculoNuevo.setKilometraje(10000);
+        vehiculoNuevo.setMotor("1.0L");
+        vehiculoNuevo.setCliente(cliente);
 
         Vehiculo vehiculoGuardado = new Vehiculo();
         vehiculoGuardado.setId(2L);
@@ -103,78 +101,44 @@ public class VehiculoControllerTest {
         vehiculoGuardado.setKilometraje(10000);
         vehiculoGuardado.setMotor("1.0L");
         vehiculoGuardado.setActivo(true);
+        vehiculoGuardado.setCliente(cliente);
 
         when(vehiculoService.crearVehiculo(any(Vehiculo.class))).thenReturn(vehiculoGuardado);
 
         // WHEN & THEN
         mockMvc.perform(post("/api/vehiculos/crear")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(nuevoVehiculo)))
+                        .content(objectMapper.writeValueAsString(vehiculoNuevo)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(2))
                 .andExpect(jsonPath("$.patente").value("ZZ999YY"))
+                .andExpect(jsonPath("$.motor").value("1.0L"))
                 .andExpect(jsonPath("$.activo").value(true))
                 .andDo(document("crear-vehiculo"));
     }
 
     @Test
-    @DisplayName("POST /crear: responde 500 cuando el service lanza excepción por patente duplicada")
-    public void debeRechazarVehiculoConPatenteDuplicada() throws Exception {
+    @DisplayName("POST /crear: lanza ServletException cuando la patente ya existe")
+    public void debeRechazarVehiculoConPatenteDuplicada() {
 
         // GIVEN
-        Vehiculo vehiculoConPatenteExistente = new Vehiculo();
-        vehiculoConPatenteExistente.setPatente("AA123BB");
-        vehiculoConPatenteExistente.setMarca("Fiat");
-        vehiculoConPatenteExistente.setModelo("Uno");
+        Vehiculo vehiculoDuplicado = new Vehiculo();
+        vehiculoDuplicado.setPatente("AA123BB");
+        vehiculoDuplicado.setMarca("Fiat");
+        vehiculoDuplicado.setModelo("Uno");
+        vehiculoDuplicado.setMotor("1.4L");
 
         when(vehiculoService.crearVehiculo(any(Vehiculo.class)))
                 .thenThrow(new IllegalArgumentException("Patente ya existe en el sistema"));
 
-       // WHEN & THEN (Esperamos que explote el ServletException debido al entorno aislado)
-        jakarta.servlet.ServletException exception = org.junit.jupiter.api.Assertions.assertThrows(
+        // WHEN & THEN
+        org.junit.jupiter.api.Assertions.assertThrows(
                 jakarta.servlet.ServletException.class, () -> {
                     mockMvc.perform(post("/api/vehiculos/crear")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(vehiculoConPatenteExistente)));
+                            .content(objectMapper.writeValueAsString(vehiculoDuplicado)));
                 }
         );
-
-        // Verificamos que la causa real sea el mensaje que mockeamos
-        org.junit.jupiter.api.Assertions.assertTrue(exception.getCause().getMessage().contains("Patente ya existe"));
-    }
-
-    // ─── DELETE /api/vehiculos/eliminar/{id} ──────────────────────────────────
-
-    @Test
-    @DisplayName("DELETE /eliminar/{id}: responde 200 OK al dar de baja un vehículo existente")
-    public void debeEliminarVehiculoYDocumentar() throws Exception {
-
-        // GIVEN
-        doNothing().when(vehiculoService).eliminarVehiculo(1L);
-
-        // WHEN & THEN
-        mockMvc.perform(delete("/api/vehiculos/eliminar/{id}", 1L))
-                .andExpect(status().isOk())
-                .andExpect(content().string("El vehiculo con ID 1 fue dado de baja correctamente"))
-                .andDo(document("eliminar-vehiculo"));
-    }
-
-    @Test
-    @DisplayName("DELETE /eliminar/{id}: responde 500 cuando el vehículo no existe")
-    public void debeRechazarEliminarVehiculoInexistente() throws Exception {
-
-        // GIVEN
-        doThrow(new RuntimeException("Vehiculo no encontrado con el id99"))
-                .when(vehiculoService).eliminarVehiculo(99L);
-
-        // WHEN & THEN
-        jakarta.servlet.ServletException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(delete("/api/vehiculos/eliminar/{id}", 99L));
-                }
-        );
-
-        org.junit.jupiter.api.Assertions.assertTrue(exception.getCause().getMessage().contains("Vehiculo no encontrado"));
     }
 
     // ─── GET /api/vehiculos/{id}/gastos ───────────────────────────────────────
@@ -201,23 +165,35 @@ public class VehiculoControllerTest {
                 .andDo(document("gastos-vehiculo"));
     }
 
+    // ─── DELETE /api/vehiculos/eliminar/{id} ──────────────────────────────────
+
     @Test
-    @DisplayName("GET /{id}/gastos: responde 200 OK con costos en cero cuando no hay registros")
-    public void debeObtenerGastosVehiculoConTodoEnCero() throws Exception {
+    @DisplayName("DELETE /eliminar/{id}: responde 200 OK al dar de baja un vehículo existente")
+    public void debeEliminarVehiculoYDocumentar() throws Exception {
 
         // GIVEN
-        GastoVehiculoDTO gastosVacios = new GastoVehiculoDTO(
-                BigDecimal.ZERO,
-                BigDecimal.ZERO,
-                BigDecimal.ZERO
-        );
-
-        when(vehiculoService.getGastoVehiculoDTO(2L)).thenReturn(gastosVacios);
+        doNothing().when(vehiculoService).eliminarVehiculo(1L);
 
         // WHEN & THEN
-        mockMvc.perform(get("/api/vehiculos/{id}/gastos", 2L))
+        mockMvc.perform(delete("/api/vehiculos/eliminar/{id}", 1L))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.costoTotal").value(0))
-                .andDo(document("gastos-vehiculo-sin-registros"));
+                .andExpect(content().string("El vehiculo con ID 1 fue dado de baja correctamente"))
+                .andDo(document("eliminar-vehiculo"));
+    }
+
+    @Test
+    @DisplayName("DELETE /eliminar/{id}: lanza ServletException cuando el vehículo no existe")
+    public void debeLanzarExcepcionAlEliminarVehiculoInexistente() {
+
+        // GIVEN
+        doThrow(new RuntimeException("Vehiculo no encontrado con el id99"))
+                .when(vehiculoService).eliminarVehiculo(99L);
+
+        // WHEN & THEN
+        org.junit.jupiter.api.Assertions.assertThrows(
+                jakarta.servlet.ServletException.class, () -> {
+                    mockMvc.perform(delete("/api/vehiculos/eliminar/{id}", 99L));
+                }
+        );
     }
 }

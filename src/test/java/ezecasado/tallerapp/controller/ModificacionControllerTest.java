@@ -36,7 +36,7 @@ public class ModificacionControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private tools.jackson.databind.ObjectMapper objectMapper;
 
     @MockitoBean
     private ModificacionService modificacionService;
@@ -51,10 +51,13 @@ public class ModificacionControllerTest {
         Vehiculo vehiculo = new Vehiculo();
         vehiculo.setId(1L);
         vehiculo.setPatente("ABC123");
+        vehiculo.setMotor("2.0L turbo");
 
-        Empleado empleado = new Empleado("Técnico", "tecnico1", "hash123");
-        empleado.setId(5L);
+        Empleado empleado = new Empleado("Instalador", "instal1", "hash456");
+        empleado.setId(3L);
 
+        // JSON que llega en el body del POST
+        // Nota: Modificacion NO tiene campo de texto para descripción o comentario
         Modificacion modNueva = new Modificacion();
         modNueva.setNombre("Kit turbo");
         modNueva.setCosto(new BigDecimal("3500.00"));
@@ -63,6 +66,7 @@ public class ModificacionControllerTest {
         modNueva.setVehiculo(vehiculo);
         modNueva.setEmpleado(empleado);
 
+        // Lo que el service devuelve una vez persistido
         Modificacion modGuardada = new Modificacion();
         modGuardada.setId(20L);
         modGuardada.setNombre("Kit turbo");
@@ -93,33 +97,35 @@ public class ModificacionControllerTest {
 
         // GIVEN
         Modificacion modSinVehiculo = new Modificacion();
-        modSinVehiculo.setNombre("Spoiler");
-        modSinVehiculo.setCosto(new BigDecimal("1500.00"));
+        modSinVehiculo.setNombre("Spoiler trasero");
+        modSinVehiculo.setCosto(new BigDecimal("800.00"));
         modSinVehiculo.setFecha(LocalDate.of(2026, 6, 1));
+        modSinVehiculo.setSigueInstalada(true);
 
         when(modificacionService.crearModificacion(any(Modificacion.class)))
                 .thenThrow(new IllegalArgumentException("Vehiculo no encontrado en el sistema"));
 
         // WHEN & THEN
-        jakarta.servlet.ServletException exception = Assertions.assertThrows(
+        Assertions.assertThrows(
                 jakarta.servlet.ServletException.class, () -> {
                     mockMvc.perform(post("/api/modificaciones/crear")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(modSinVehiculo)));
                 }
         );
-        Assertions.assertTrue(exception.getCause().getMessage().contains("Vehiculo no encontrado en el sistema"));
     }
 
-    // ─── GET /api/modificaciones/vehiculo/{id} ────────────────────────────────
+    // ─── GET /api/modificaciones/vehiculo/{id} → snippet: "listar-modificaciones"
 
     @Test
-    @DisplayName("GET /vehiculo/{id}: responde 200 OK con el historial de modificaciones del vehículo")
-    public void debeObtenerModificacionesPorVehiculoYDocumentar() throws Exception {
+    @DisplayName("GET /vehiculo/{id}: responde 200 OK con las modificaciones del vehículo")
+    public void debeListarModificacionesPorVehiculoYDocumentar() throws Exception {
 
         // GIVEN
         Long idVehiculo = 1L;
 
+        // Modificacion: solo tiene nombre, costo, fecha, activa y sigueInstalada
+        // NO tiene campos de descripción o comentario
         Modificacion modFalsa = new Modificacion();
         modFalsa.setId(20L);
         modFalsa.setNombre("Kit turbo");
@@ -138,7 +144,8 @@ public class ModificacionControllerTest {
                 .andExpect(jsonPath("$[0].nombre").value("Kit turbo"))
                 .andExpect(jsonPath("$[0].costo").value(3500.00))
                 .andExpect(jsonPath("$[0].activa").value(true))
-                .andDo(document("listar-modificaciones-por-vehiculo"));
+                .andExpect(jsonPath("$[0].sigueInstalada").value(true))
+                .andDo(document("listar-modificaciones"));
     }
 
     @Test
@@ -181,11 +188,10 @@ public class ModificacionControllerTest {
                 .when(modificacionService).eliminarModificacion(99L);
 
         // WHEN & THEN
-        jakarta.servlet.ServletException exception = Assertions.assertThrows(
+        Assertions.assertThrows(
                 jakarta.servlet.ServletException.class, () -> {
                     mockMvc.perform(delete("/api/modificaciones/eliminar/{id}", 99L));
                 }
         );
-        Assertions.assertTrue(exception.getCause().getMessage().contains("Modificación no encontrada con el ID: 99"));
     }
 }

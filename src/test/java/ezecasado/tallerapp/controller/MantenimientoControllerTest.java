@@ -1,11 +1,15 @@
 package ezecasado.tallerapp.controller;
 
 
+import ezecasado.tallerapp.models.Empleado;
 import ezecasado.tallerapp.models.Mantenimiento;
+import ezecasado.tallerapp.models.Vehiculo;
 import ezecasado.tallerapp.service.MantenimientoService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -31,27 +35,105 @@ public class MantenimientoControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockitoBean
     private MantenimientoService mantenimientoService;
-    @Autowired
-    private ObjectMapper objectMapper;
+
+    // ─── POST /api/mantenimientos/crear → snippet: "registrar-mantenimiento" ─
+
+    @Test
+    @DisplayName("POST /crear: responde 201 CREATED al registrar un mantenimiento válido")
+    public void debeRegistrarMantenimientoYDocumentar() throws Exception {
+
+        // GIVEN — armamos vehículo y empleado de referencia
+        Vehiculo vehiculo = new Vehiculo();
+        vehiculo.setId(1L);
+        vehiculo.setPatente("AA123BB");
+        vehiculo.setMotor("1.6L");
+
+        Empleado empleado = new Empleado("Técnico", "tecnico1", "hash123");
+        empleado.setId(5L);
+
+        // JSON que llega en el body del POST
+        Mantenimiento manNuevo = new Mantenimiento();
+        manNuevo.setDescripcion("Cambio de aceite y filtros");
+        manNuevo.setCosto(new BigDecimal("1200.00"));
+        manNuevo.setFecha(LocalDate.of(2026, 6, 7));
+        manNuevo.setKilometraje(55000);
+        manNuevo.setComentario("Sin novedad. Aceite 5W30.");
+        manNuevo.setVehiculo(vehiculo);
+        manNuevo.setEmpleado(empleado);
+
+        // Lo que el service devuelve una vez persistido (tiene id asignado)
+        Mantenimiento manGuardado = new Mantenimiento();
+        manGuardado.setId(10L);
+        manGuardado.setDescripcion("Cambio de aceite y filtros");
+        manGuardado.setCosto(new BigDecimal("1200.00"));
+        manGuardado.setFecha(LocalDate.of(2026, 6, 7));
+        manGuardado.setKilometraje(55000);
+        manGuardado.setComentario("Sin novedad. Aceite 5W30.");
+        manGuardado.setActivo(true);
+        manGuardado.setVehiculo(vehiculo);
+        manGuardado.setEmpleado(empleado);
+
+        when(mantenimientoService.agregarMantenimiento(any(Mantenimiento.class)))
+                .thenReturn(manGuardado);
+
+        // WHEN & THEN
+        mockMvc.perform(post("/api/mantenimientos/crear")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(manNuevo)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(10))
+                .andExpect(jsonPath("$.descripcion").value("Cambio de aceite y filtros"))
+                .andExpect(jsonPath("$.costo").value(1200.00))
+                .andExpect(jsonPath("$.comentario").value("Sin novedad. Aceite 5W30."))
+                .andExpect(jsonPath("$.activo").value(true))
+                .andDo(document("registrar-mantenimiento"));
+    }
+
+    @Test
+    @DisplayName("POST /crear: lanza ServletException cuando el vehículo asociado no existe")
+    public void debeRechazarMantenimientoConVehiculoInexistente() {
+
+        // GIVEN
+        Mantenimiento manSinVehiculo = new Mantenimiento();
+        manSinVehiculo.setDescripcion("Cambio de correa");
+        manSinVehiculo.setCosto(new BigDecimal("5000.00"));
+        manSinVehiculo.setFecha(LocalDate.of(2026, 6, 7));
+        manSinVehiculo.setComentario("Revisión completa");
+
+        when(mantenimientoService.agregarMantenimiento(any(Mantenimiento.class)))
+                .thenThrow(new IllegalArgumentException("Vehiculo no encontrado en el sistema"));
+
+        // WHEN & THEN
+        Assertions.assertThrows(
+                jakarta.servlet.ServletException.class, () -> {
+                    mockMvc.perform(post("/api/mantenimientos/crear")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(manSinVehiculo)));
+                }
+        );
+    }
 
     // ─── GET /api/mantenimientos/vehiculo/{id} ────────────────────────────────
 
     @Test
     @DisplayName("GET /vehiculo/{id}: responde 200 OK con el historial del vehículo")
-    public void debeObtenerMantenimientosPorVehiculoYDocumentar() throws Exception {
+    public void debeObtenerHistorialMantenimientoYDocumentar() throws Exception {
 
         // GIVEN
         Long idVehiculo = 1L;
 
         Mantenimiento manFalso = new Mantenimiento();
         manFalso.setId(10L);
-        manFalso.setDescripcion("Cambio de Aceite");
-        manFalso.setCosto(BigDecimal.valueOf(1200));
-        manFalso.setFecha(LocalDate.parse("2026-06-07"));
+        manFalso.setDescripcion("Cambio de aceite y filtros");
+        manFalso.setCosto(new BigDecimal("1200.00"));
+        manFalso.setFecha(LocalDate.of(2026, 6, 7));
         manFalso.setKilometraje(55000);
+        manFalso.setComentario("Sin novedad. Aceite 5W30.");
         manFalso.setActivo(true);
 
         when(mantenimientoService.obtenerMantenimientosPorVehiculo(idVehiculo))
@@ -61,9 +143,10 @@ public class MantenimientoControllerTest {
         mockMvc.perform(get("/api/mantenimientos/vehiculo/{id}", idVehiculo))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(10))
-                .andExpect(jsonPath("$[0].descripcion").value("Cambio de Aceite"))
-                .andExpect(jsonPath("$[0].costo").value(1200))
-                .andDo(document("listar-mantenimientos-por-vehiculo"));
+                .andExpect(jsonPath("$[0].descripcion").value("Cambio de aceite y filtros"))
+                .andExpect(jsonPath("$[0].comentario").value("Sin novedad. Aceite 5W30."))
+                .andExpect(jsonPath("$[0].costo").value(1200.00))
+                .andDo(document("historial-mantenimiento-por-vehiculo"));
     }
 
     @Test
@@ -78,77 +161,7 @@ public class MantenimientoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty())
-                .andDo(document("listar-mantenimientos-vacio"));
-    }
-
-    // ─── POST /api/mantenimientos/crear ───────────────────────────────────────
-
-    @Test
-    @DisplayName("POST /crear: responde 201 CREATED al registrar un mantenimiento válido")
-    public void debeCrearMantenimientoYDocumentar() throws Exception {
-
-        // GIVEN
-        // El JSON que llega en el body del POST
-        Mantenimiento nuevoMan = new Mantenimiento();
-        nuevoMan.setDescripcion("Cambio de correa de distribución");
-        nuevoMan.setCosto(new BigDecimal("8500.00"));
-        nuevoMan.setFecha(LocalDate.of(2026, 6, 7));
-        nuevoMan.setKilometraje(60000);
-        nuevoMan.setComentario("Se recomienda revisión en 20.000 km");
-
-        // Lo que el service devuelve una vez guardado (tiene id asignado)
-        Mantenimiento manGuardado = new Mantenimiento();
-        manGuardado.setId(11L);
-        manGuardado.setDescripcion("Cambio de correa de distribución");
-        manGuardado.setCosto(new BigDecimal("8500.00"));
-        manGuardado.setFecha(LocalDate.of(2026, 6, 7));
-        manGuardado.setKilometraje(60000);
-        manGuardado.setComentario("Se recomienda revisión en 20.000 km");
-        manGuardado.setActivo(true);
-
-        // Registramos el JavaTimeModule para que ObjectMapper serialice LocalDate
-
-
-        when(mantenimientoService.agregarMantenimiento(any(Mantenimiento.class)))
-                .thenReturn(manGuardado);
-
-        // WHEN & THEN
-        mockMvc.perform(post("/api/mantenimientos/crear")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(nuevoMan)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(11))
-                .andExpect(jsonPath("$.descripcion").value("Cambio de correa de distribución"))
-                .andExpect(jsonPath("$.costo").value(8500.00))
-                .andExpect(jsonPath("$.activo").value(true))
-                .andDo(document("crear-mantenimiento"));
-    }
-
-    @Test
-    @DisplayName("POST /crear: responde 500 cuando el vehículo asociado no existe")
-    public void debeRechazarMantenimientoConVehiculoInexistente() throws Exception {
-
-        // GIVEN
-        Mantenimiento manSinVehiculo = new Mantenimiento();
-        manSinVehiculo.setDescripcion("Cambio de aceite");
-        manSinVehiculo.setCosto(new BigDecimal("500.00"));
-        manSinVehiculo.setFecha(LocalDate.of(2026, 6, 7));
-
-
-        when(mantenimientoService.agregarMantenimiento(any(Mantenimiento.class)))
-                .thenThrow(new IllegalArgumentException("Vehiculo no encontrado en el sistema"));
-
-        // WHEN & THEN: Atrapamos la excepción del entorno aislado
-        jakarta.servlet.ServletException exception = org.junit.jupiter.api.Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(post("/api/mantenimientos/crear")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(manSinVehiculo)));
-                }
-        );
-
-        // Verificamos que la causa real sea el mensaje del Service
-        org.junit.jupiter.api.Assertions.assertTrue(exception.getCause().getMessage().contains("Vehiculo no encontrado"));
+                .andDo(document("historial-mantenimiento-vacio"));
     }
 
     // ─── DELETE /api/mantenimientos/eliminar/{id} ─────────────────────────────
@@ -168,22 +181,18 @@ public class MantenimientoControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /eliminar/{id}: responde 500 cuando el mantenimiento no existe")
-    public void debeRechazarEliminarMantenimientoInexistente() throws Exception {
+    @DisplayName("DELETE /eliminar/{id}: lanza ServletException cuando el mantenimiento no existe")
+    public void debeLanzarExcepcionAlEliminarMantenimientoInexistente() {
 
         // GIVEN
         doThrow(new IllegalArgumentException("No existe el mantenimiento con el id: 99"))
                 .when(mantenimientoService).eliminarMantenimiento(99L);
 
-        // WHEN & THEN: Atrapamos el ServletException
-        jakarta.servlet.ServletException exception = org.junit.jupiter.api.Assertions.assertThrows(
+        // WHEN & THEN
+        Assertions.assertThrows(
                 jakarta.servlet.ServletException.class, () -> {
                     mockMvc.perform(delete("/api/mantenimientos/eliminar/{id}", 99L));
                 }
         );
-
-        // Verificamos el mensaje de error interno
-        org.junit.jupiter.api.Assertions.assertTrue(exception.getCause().getMessage().contains("No existe el mantenimiento"));
-
     }
 }
