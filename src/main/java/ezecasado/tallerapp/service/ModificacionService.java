@@ -40,5 +40,12 @@ public class ModificacionService {
         return modificacionRepository.findByActiva(true);
     }
 
+    public List<Modificacion> listarModificacionesPorVehiculo(Long id) {
+
+        return modificacionRepository.findByVehiculoId(id);
+
+
+    }
+
 
 }

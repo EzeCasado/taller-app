@@ -37,6 +37,28 @@ public class EmpleadoService {
 
     }
 
+    public Empleado buscarEmpleadoPorId(long id){
+
+        return empleadoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
+
+    }
+
+    public Empleado actualizarEmpleado(Empleado empleado){
+        return empleadoRepository.save(empleado);
+    }
+
+    public void eliminarEmpleado(long id){
+
+        Empleado empleado = empleadoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
+
+        empleado.setActivo(false);
+
+        empleadoRepository.save(empleado);
+
+    }
+
 
 
 
