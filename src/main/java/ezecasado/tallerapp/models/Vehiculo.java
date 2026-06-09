@@ -15,20 +15,20 @@ public class Vehiculo {
 
     private String marca;
     private String modelo;
-    private int anio;
-    private int kilometraje;
+    private Integer anio;
+    private Integer kilometraje;
     private String motor;
 
     @Column(columnDefinition = "MEDIUMTEXT")
     private String comentarios;
 
-    private boolean activo;
+    private Boolean activo;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    public Vehiculo(boolean activo, int anio, Cliente cliente, String comentarios,int kilometraje, String marca, String modelo, String motor, String patente) {
+    public Vehiculo(Boolean activo, Integer anio, Cliente cliente, String comentarios,Integer kilometraje, String marca, String modelo, String motor, String patente) {
         this.activo = true;
         this.anio = anio;
         this.cliente = cliente;
@@ -46,11 +46,11 @@ public class Vehiculo {
         return id;
     }
 
-    public boolean isActivo() {
+    public Boolean getActivo() {
         return activo;
     }
 
-    public int getAnio() {
+    public Integer getAnio() {
         return anio;
     }
 
@@ -62,7 +62,7 @@ public class Vehiculo {
         return comentarios;
     }
 
-    public int getKilometraje() {
+    public Integer getKilometraje() {
         return kilometraje;
     }
 
@@ -82,11 +82,11 @@ public class Vehiculo {
         return patente;
     }
 
-    public void setActivo(boolean activo) {
+    public void setActivo(Boolean activo) {
         this.activo = activo;
     }
 
-    public void setAnio(int anio) {
+    public void setAnio(Integer anio) {
         this.anio = anio;
     }
 
@@ -98,7 +98,7 @@ public class Vehiculo {
         this.comentarios = comentarios;
     }
 
-    public void setKilometraje(int kilometraje) {
+    public void setKilometraje(Integer kilometraje) {
         this.kilometraje = kilometraje;
     }
 

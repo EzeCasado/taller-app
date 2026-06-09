@@ -115,7 +115,8 @@ class VehiculoServiceTest {
         vehiculoService.eliminarVehiculo(1L);
 
         // THEN
-        assertThat(vehiculoValido.isActivo()).isFalse();
+        assertThat(vehiculoValido
+                .getActivo()).isFalse();
         verify(vehiculoRepo, times(1)).save(vehiculoValido);
     }
 
@@ -146,7 +147,7 @@ class VehiculoServiceTest {
 
         // THEN
         assertThat(resultado).hasSize(1);
-        assertThat(resultado.get(0).isActivo()).isTrue();
+        assertThat(resultado.get(0).getActivo()).isTrue();
     }
 
     // ─── getGastoVehiculoDTO ──────────────────────────────────────────────────

@@ -21,12 +21,12 @@ public class Mantenimiento {
 
     private BigDecimal costo;
 
-    private int kilometraje;
+    private Integer kilometraje;
 
     @Column(columnDefinition = "MEDIUMTEXT")
     private String comentario;
 
-    private boolean activo;
+    private Boolean activo;
 
     @ManyToOne
     @JoinColumn(name = "vehiculo_id")
@@ -38,7 +38,7 @@ public class Mantenimiento {
 
     public Mantenimiento() {}
 
-    public Mantenimiento(boolean activo, String comentario, BigDecimal costo, String descripcion, Empleado empleado, LocalDate fecha, int kilometraje, Vehiculo vehiculo) {
+    public Mantenimiento(Boolean activo, String comentario, BigDecimal costo, String descripcion, Empleado empleado, LocalDate fecha, Integer kilometraje, Vehiculo vehiculo) {
         this.activo = true;
         this.comentario = comentario;
         this.costo = costo;
@@ -53,7 +53,7 @@ public class Mantenimiento {
         return id;
     }
 
-    public boolean isActivo() {
+    public Boolean getActivo() {
         return activo;
     }
 
@@ -77,7 +77,7 @@ public class Mantenimiento {
         return fecha;
     }
 
-    public int getKilometraje() {
+    public Integer getKilometraje() {
         return kilometraje;
     }
 
@@ -86,7 +86,7 @@ public class Mantenimiento {
     }
 
 
-    public void setActivo(boolean activo) {
+    public void setActivo(Boolean activo) {
         this.activo = activo;
     }
 
@@ -110,7 +110,7 @@ public class Mantenimiento {
         this.fecha = fecha;
     }
 
-    public void setKilometraje(int kilometraje) {
+    public void setKilometraje(Integer kilometraje) {
         this.kilometraje = kilometraje;
     }
 

@@ -50,7 +50,7 @@ class EmpleadoServiceTest {
         // THEN
         assertThat(resultado).isNotNull();
         assertThat(resultado.getUsuario()).isEqualTo("carlitos");
-        assertThat(resultado.isActivo()).isTrue();
+        assertThat(resultado.getActivo()).isTrue();
         verify(empleadoRepository, times(1)).save(empleadoValido);
     }
 
@@ -80,7 +80,7 @@ class EmpleadoServiceTest {
         Empleado resultado = empleadoService.crearEmpleado(empleadoValido);
 
         // THEN
-        assertThat(resultado.isActivo()).isTrue();
+        assertThat(resultado.getActivo()).isTrue();
     }
 
     // ─── listarEmpleadosActivos ───────────────────────────────────────────────

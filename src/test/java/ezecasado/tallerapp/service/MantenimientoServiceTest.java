@@ -138,7 +138,7 @@ class MantenimientoServiceTest {
         mantenimientoService.eliminarMantenimiento(10L);
 
         // THEN
-        assertThat(mantenimientoValido.isActivo()).isFalse();
+        assertThat(mantenimientoValido.getActivo()).isFalse();
         verify(mantenimientoRepository, times(1)).save(mantenimientoValido);
     }
 

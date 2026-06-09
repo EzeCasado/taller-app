@@ -21,7 +21,7 @@ public class Empleado {
     @Column(name = "password_hash", nullable = false)
     private String contrasenia;
 
-    private boolean activo;
+    private Boolean activo;
 
     public Empleado(String nombre, String usuario, String contrasenia) {
 
@@ -36,11 +36,11 @@ public class Empleado {
 
     public Empleado(){}
 
-    public boolean isActivo() {
+    public Boolean getActivo() {
         return activo;
     }
 
-    public void setActivo(boolean activo) {
+    public void setActivo(Boolean activo) {
         this.activo = activo;
     }
 

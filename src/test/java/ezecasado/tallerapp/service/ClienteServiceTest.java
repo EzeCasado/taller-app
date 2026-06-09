@@ -82,7 +82,7 @@ class ClienteServiceTest {
 
         // THEN
         assertThat(resultado).hasSize(1);
-        assertThat(resultado.get(0).isActivo()).isTrue();
+        assertThat(resultado.get(0).getActivo()).isTrue();
         verify(clienteRepository, times(1)).findByActivoTrue();
     }
 

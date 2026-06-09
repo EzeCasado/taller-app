@@ -17,11 +17,11 @@ public class Cliente {
 
     @Column(columnDefinition = "MEDIUMTEXT")
     private String observaciones;
-    private boolean activo;
+    private Boolean activo;
 
     public Cliente(){}
 
-    public Cliente(boolean activo, String apellido, String email,String nombre, String observaciones, String telefono) {
+    public Cliente(Boolean activo, String apellido, String email,String nombre, String observaciones, String telefono) {
         this.activo = true;
         this.apellido = apellido;
         this.email = email;
@@ -30,11 +30,11 @@ public class Cliente {
         this.telefono = telefono;
     }
 
-    public boolean isActivo() {
+    public Boolean getActivo() {
         return activo;
     }
 
-    public void setActivo(boolean activo) {
+    public void setActivo(Boolean activo) {
         this.activo = activo;
     }
 

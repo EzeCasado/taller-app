@@ -69,7 +69,7 @@ class ModificacionServiceTest {
         assertThat(resultado).isNotNull();
         assertThat(resultado.getNombre()).isEqualTo("Kit turbo");
         assertThat(resultado.getCosto()).isEqualByComparingTo("3500.00");
-        assertThat(resultado.isActiva()).isTrue();
+        assertThat(resultado.getActiva()).isTrue();
         verify(modificacionRepository, times(1)).save(modificacionValida);
     }
 
@@ -83,7 +83,7 @@ class ModificacionServiceTest {
         Modificacion resultado = modificacionService.crearModificacion(modificacionValida);
 
         // THEN
-        assertThat(resultado.isSigueInstalada()).isTrue();
+        assertThat(resultado.getSigueInstalada()).isTrue();
     }
 
     // ─── eliminarModificacion ─────────────────────────────────────────────────
@@ -99,7 +99,7 @@ class ModificacionServiceTest {
         modificacionService.eliminarModificacion(20L);
 
         // THEN
-        assertThat(modificacionValida.isActiva()).isFalse();
+        assertThat(modificacionValida.getActiva()).isFalse();
         verify(modificacionRepository, times(1)).save(modificacionValida);
     }
 

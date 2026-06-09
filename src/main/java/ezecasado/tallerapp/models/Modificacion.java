@@ -19,9 +19,9 @@ public class Modificacion {
 
     private BigDecimal costo;
 
-    private boolean activa;
+    private Boolean activa;
 
-    private boolean sigueInstalada;
+    private Boolean sigueInstalada;
 
     @ManyToOne
     @JoinColumn(name = "vehiculo_id")
@@ -32,7 +32,7 @@ public class Modificacion {
     private Empleado empleado;
 
 
-    public Modificacion(boolean activa, BigDecimal costo, Empleado empleado, LocalDate fecha, String nombre, boolean sigueInstalada, Vehiculo vehiculo) {
+    public Modificacion(Boolean activa, BigDecimal costo, Empleado empleado, LocalDate fecha, String nombre, Boolean sigueInstalada, Vehiculo vehiculo) {
         this.activa = true;
         this.costo = costo;
         this.empleado = empleado;
@@ -45,7 +45,7 @@ public class Modificacion {
     public Modificacion() {}
 
 
-    public boolean isActiva() {
+    public Boolean getActiva() {
         return activa;
     }
 
@@ -69,7 +69,7 @@ public class Modificacion {
         return nombre;
     }
 
-    public boolean isSigueInstalada() {
+    public Boolean getSigueInstalada() {
         return sigueInstalada;
     }
 
@@ -77,7 +77,7 @@ public class Modificacion {
         return vehiculo;
     }
 
-    public void setActiva(boolean activa) {
+    public void setActiva(Boolean activa) {
         this.activa = activa;
     }
 
@@ -97,7 +97,7 @@ public class Modificacion {
         this.nombre = nombre;
     }
 
-    public void setSigueInstalada(boolean sigueInstalada) {
+    public void setSigueInstalada(Boolean sigueInstalada) {
         this.sigueInstalada = sigueInstalada;
     }
 
