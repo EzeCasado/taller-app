@@ -1,6 +1,15 @@
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
 
+/**
+ * Componente React: Modal.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de Modal
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente Modal.
+ */
 export default function Modal({ open, onClose, title, children, footer, size = 'md' }) {
   // Close on Escape key
   useEffect(() => {

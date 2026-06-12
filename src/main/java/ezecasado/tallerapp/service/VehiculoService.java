@@ -2,6 +2,7 @@ package ezecasado.tallerapp.service;
 
 
 import ezecasado.tallerapp.DTO.GastoVehiculoDTO;
+import ezecasado.tallerapp.exception.ResourceNotFoundException;
 import ezecasado.tallerapp.models.Vehiculo;
 import ezecasado.tallerapp.repository.ClienteRepository;
 import ezecasado.tallerapp.repository.MantenimientoRepository;
@@ -13,6 +14,15 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+/**
+ * Clase: VehiculoService.
+ * 
+ * Esta clase es responsable de proveer las funcionalidades relacionadas con VehiculoService
+ * dentro del dominio de la aplicación.
+ * 
+ * @author EzeCasado
+ * @version 1.0
+ */
 public class VehiculoService {
 
     private final vehiculoRepository vehiculoRepository;
@@ -39,13 +49,13 @@ public class VehiculoService {
         if(clienteRepository.findById(vehiculo.getCliente().getId()).isEmpty()){
 
 
-            throw new IllegalArgumentException("Cliente no encontrado en el sistema");
+            throw new ResourceNotFoundException("Cliente no encontrado en el sistema");
 
         }
 
         if (vehiculoRepository.findByPatente(vehiculo.getPatente()).isPresent()){
 
-            throw new IllegalArgumentException("Patente ya existe en el sistema");
+            throw new ResourceNotFoundException("Patente ya existe en el sistema");
 
         }
 
@@ -82,7 +92,7 @@ public class VehiculoService {
     public void eliminarVehiculo(Long vehiculoId){
 
         Vehiculo vehiculo = vehiculoRepository.findById(vehiculoId)
-                .orElseThrow(() -> new RuntimeException("Vehiculo no encontrado con el id" + vehiculoId));
+                .orElseThrow(() -> new ResourceNotFoundException("Vehiculo no encontrado con el id" + vehiculoId));
 
         vehiculo.setActivo(false);
 

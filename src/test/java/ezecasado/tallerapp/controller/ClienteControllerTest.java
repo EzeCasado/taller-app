@@ -6,6 +6,7 @@ import ezecasado.tallerapp.service.ClienteService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
@@ -41,6 +42,7 @@ public class ClienteControllerTest {
     // ─── POST /api/clientes/crear ─────────────────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /crear: responde 201 CREATED al registrar un cliente válido")
     public void debeCrearClienteYDocumentar() throws Exception {
 
@@ -74,8 +76,9 @@ public class ClienteControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /crear: lanza ServletException cuando el email ya existe en el sistema")
-    public void debeRechazarClienteConEmailDuplicado() {
+    public void debeRechazarClienteConEmailDuplicado() throws Exception {
 
         // GIVEN
         Cliente clienteConEmailExistente = new Cliente();
@@ -83,22 +86,19 @@ public class ClienteControllerTest {
         clienteConEmailExistente.setEmail("juan@mail.com");
 
         when(clienteService.registrarCliente(any(Cliente.class)))
-                .thenThrow(new IllegalArgumentException("El email ya existe en el sistema"));
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException("El email ya existe en el sistema"));
 
         // WHEN & THEN
-        jakarta.servlet.ServletException exception = Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(post("/api/clientes/crear")
+        mockMvc.perform(post("/api/clientes/crear")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(clienteConEmailExistente)));
-                }
-        );
-        Assertions.assertTrue(exception.getCause().getMessage().contains("El email ya existe en el sistema"));
+                            .content(objectMapper.writeValueAsString(clienteConEmailExistente)))
+                .andExpect(status().is4xxClientError());
     }
 
     // ─── GET /api/clientes/listar ─────────────────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /listar: responde 200 OK con la lista de clientes activos")
     public void debeListarClientesActivosYDocumentar() throws Exception {
 
@@ -122,6 +122,7 @@ public class ClienteControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /listar: responde 200 OK con lista vacía cuando no hay clientes activos")
     public void debeRetornarListaVaciaCuandoNoHayClientesActivos() throws Exception {
 
@@ -139,6 +140,7 @@ public class ClienteControllerTest {
     // ─── GET /api/clientes/cliente/{id} ──────────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /cliente/{id}: responde 200 OK con el cliente encontrado")
     public void debeBuscarClientePorIdYDocumentar() throws Exception {
 
@@ -162,25 +164,23 @@ public class ClienteControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /cliente/{id}: lanza ServletException cuando el cliente no existe")
-    public void debeLanzarExcepcionCuandoClienteNoExiste() {
+    public void debeLanzarExcepcionCuandoClienteNoExiste() throws Exception {
 
         // GIVEN
         when(clienteService.buscarCliente(99L))
-                .thenThrow(new RuntimeException("Cliente no encontrado con id: 99"));
+                .thenThrow(new ezecasado.tallerapp.exception.ResourceNotFoundException("Cliente no encontrado con id: 99"));
 
         // WHEN & THEN
-        jakarta.servlet.ServletException exception = Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(get("/api/clientes/cliente/{id}", 99L));
-                }
-        );
-        Assertions.assertTrue(exception.getCause().getMessage().contains("Cliente no encontrado con id: 99"));
+        mockMvc.perform(get("/api/clientes/cliente/{id}", 99L))
+                .andExpect(status().is4xxClientError());
     }
 
     // ─── GET /api/clientes/eliminar/{id} ─────────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /eliminar/{id}: responde 200 OK al dar de baja un cliente existente")
     public void debeEliminarClienteYDocumentar() throws Exception {
 
@@ -188,32 +188,30 @@ public class ClienteControllerTest {
         doNothing().when(clienteService).eliminarCliente(1L);
 
         // WHEN & THEN
-        mockMvc.perform(get("/api/clientes/eliminar/{id}", 1L))
+        mockMvc.perform(delete("/api/clientes/eliminar/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Cliente con el id: 1 fue borrado dado de baja correctamente del sistema"))
                 .andDo(document("eliminar-cliente"));
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /eliminar/{id}: lanza ServletException cuando el cliente no existe")
-    public void debeLanzarExcepcionAlEliminarClienteInexistente() {
+    public void debeLanzarExcepcionAlEliminarClienteInexistente() throws Exception {
 
         // GIVEN
-        doThrow(new RuntimeException("Cliente no encontrado con id: 99"))
+        doThrow(new ezecasado.tallerapp.exception.ResourceNotFoundException("Cliente no encontrado con id: 99"))
                 .when(clienteService).eliminarCliente(99L);
 
         // WHEN & THEN
-        jakarta.servlet.ServletException exception = Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(get("/api/clientes/eliminar/{id}", 99L));
-                }
-        );
-        Assertions.assertTrue(exception.getCause().getMessage().contains("Cliente no encontrado con id: 99"));
+        mockMvc.perform(delete("/api/clientes/eliminar/{id}", 99L))
+                .andExpect(status().is4xxClientError());
     }
 
     // ─── PUT /api/clientes/actualizar/{id} ───────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("PUT /actualizar/{id}: responde 200 OK al actualizar un cliente existente")
     public void debeActualizarClienteYDocumentar() throws Exception {
 
@@ -255,24 +253,21 @@ public class ClienteControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("PUT /actualizar/{id}: lanza ServletException cuando el cliente a actualizar no existe")
-    public void debeLanzarExcepcionAlActualizarClienteInexistente() {
+    public void debeLanzarExcepcionAlActualizarClienteInexistente() throws Exception {
 
         // GIVEN
         Cliente datosNuevos = new Cliente();
         datosNuevos.setNombre("Fantasma");
 
         when(clienteService.buscarCliente(99L))
-                .thenThrow(new RuntimeException("Cliente no encontrado con id: 99"));
+                .thenThrow(new ezecasado.tallerapp.exception.ResourceNotFoundException("Cliente no encontrado con id: 99"));
 
         // WHEN & THEN
-        jakarta.servlet.ServletException exception = Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(put("/api/clientes/actualizar/{id}", 99L)
+        mockMvc.perform(put("/api/clientes/actualizar/{id}", 99L)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(datosNuevos)));
-                }
-        );
-        Assertions.assertTrue(exception.getCause().getMessage().contains("Cliente no encontrado con id: 99"));
+                            .content(objectMapper.writeValueAsString(datosNuevos)))
+                .andExpect(status().is4xxClientError());
     }
 }

@@ -81,7 +81,7 @@ class VehiculoServiceTest {
 
         // WHEN / THEN
         assertThatThrownBy(() -> vehiculoService.crearVehiculo(vehiculoValido))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ezecasado.tallerapp.exception.ResourceNotFoundException.class)
                 .hasMessage("Cliente no encontrado en el sistema");
 
         verify(vehiculoRepo, never()).save(any());
@@ -96,7 +96,7 @@ class VehiculoServiceTest {
 
         // WHEN / THEN
         assertThatThrownBy(() -> vehiculoService.crearVehiculo(vehiculoValido))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ezecasado.tallerapp.exception.ResourceNotFoundException.class)
                 .hasMessage("Patente ya existe en el sistema");
 
         verify(vehiculoRepo, never()).save(any());

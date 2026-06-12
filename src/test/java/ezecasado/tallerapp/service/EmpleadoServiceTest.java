@@ -62,8 +62,8 @@ class EmpleadoServiceTest {
 
         // WHEN / THEN
         assertThatThrownBy(() -> empleadoService.crearEmpleado(empleadoValido))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("El usuario ya existe en el sistema");
+                .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class)
+                .hasMessage("El usuario carlitos ya existe en el sistema");
 
         // Nunca debe intentar guardar
         verify(empleadoRepository, never()).save(any());

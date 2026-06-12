@@ -8,8 +8,17 @@ import { listarEmpleados, crearEmpleado, actualizarEmpleado, eliminarEmpleado } 
 import { useAuth } from '../context/AuthContext';
 import { saveCredentials } from '../api/axiosConfig';
 
-const initialState = { nombre: '', usuario: '', contrasenia: '' };
+const initialState = { nombre: '', usuario: '', contrasenia: '', rol: 'MECANICO' };
 
+/**
+ * Componente React: Empleados.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de Empleados
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente Empleados.
+ */
 export default function Empleados({ toast }) {
   const { user, login } = useAuth();
   const [empleados, setEmpleados] = useState([]);
@@ -38,7 +47,7 @@ export default function Empleados({ toast }) {
   const openCreate = () => { setEditTarget(null); setForm(initialState); setErrors({}); setModalOpen(true); };
   const openEdit = (emp) => {
     setEditTarget(emp);
-    setForm({ nombre: emp.nombre, usuario: emp.usuario, contrasenia: '' });
+    setForm({ nombre: emp.nombre, usuario: emp.usuario, contrasenia: '', rol: emp.rol || 'MECANICO' });
     setErrors({});
     setModalOpen(true);
   };
@@ -49,6 +58,7 @@ export default function Empleados({ toast }) {
     if (!form.nombre.trim()) errs.nombre = 'El nombre es requerido';
     if (!form.usuario.trim()) errs.usuario = 'El usuario es requerido';
     if (!editTarget && !form.contrasenia.trim()) errs.contrasenia = 'La contraseña es requerida';
+    if (!form.rol) errs.rol = 'El rol es requerido';
     return errs;
   };
 
@@ -139,6 +149,15 @@ export default function Empleados({ toast }) {
       label: 'Usuario',
       render: (val) => (
         <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>@{val}</span>
+      ),
+    },
+    {
+      key: 'rol',
+      label: 'Rol',
+      render: (val) => (
+        <span className={`badge ${val === 'ADMIN' ? 'badge-info' : 'badge-neutral'}`}>
+          {val === 'ADMIN' ? 'Admin' : 'Mecánico'}
+        </span>
       ),
     },
     {
@@ -263,6 +282,23 @@ export default function Empleados({ toast }) {
               autoComplete="new-password"
             />
             {errors.contrasenia && <div className="form-error-msg">{errors.contrasenia}</div>}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="emp-rol">
+              Rol del empleado <span className="form-required">*</span>
+            </label>
+            <select
+              id="emp-rol"
+              name="rol"
+              className={`form-select${errors.rol ? ' error' : ''}`}
+              value={form.rol}
+              onChange={handleChange}
+            >
+              <option value="MECANICO">Mecánico</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
+            {errors.rol && <div className="form-error-msg">{errors.rol}</div>}
           </div>
         </form>
       </Modal>

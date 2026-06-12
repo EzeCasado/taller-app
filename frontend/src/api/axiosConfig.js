@@ -32,11 +32,14 @@ api.interceptors.response.use(
       window.location.href = '/';
     }
 
-    const message =
-      error.response?.data?.message ||
-      error.response?.data ||
-      error.message ||
-      'Error de conexión con el servidor';
+    let message = 'Error de conexión con el servidor';
+    if (error.response?.data?.message) {
+      message = error.response.data.message;
+    } else if (typeof error.response?.data === 'string') {
+      message = error.response.data;
+    } else if (error.message) {
+      message = error.message;
+    }
     return Promise.reject(new Error(message));
   }
 );

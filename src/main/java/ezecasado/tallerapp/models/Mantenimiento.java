@@ -8,6 +8,15 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "mantenimiento")
+/**
+ * Clase: Mantenimiento.
+ * 
+ * Esta clase es responsable de proveer las funcionalidades relacionadas con Mantenimiento
+ * dentro del dominio de la aplicación.
+ * 
+ * @author EzeCasado
+ * @version 1.0
+ */
 public class Mantenimiento {
 
     @Id

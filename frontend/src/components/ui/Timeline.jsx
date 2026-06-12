@@ -12,6 +12,15 @@ const formatDate = (dateStr) => {
 const formatCurrency = (val) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(val ?? 0);
 
+/**
+ * Componente React: Timeline.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de Timeline
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente Timeline.
+ */
 export default function Timeline({ mantenimientos = [], modificaciones = [] }) {
   const items = [
     ...mantenimientos.map((m) => ({ ...m, _type: 'mantenimiento', _date: new Date(m.fecha) })),

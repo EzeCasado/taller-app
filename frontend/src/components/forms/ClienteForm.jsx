@@ -8,6 +8,15 @@ const initialState = {
   observaciones: '',
 };
 
+/**
+ * Componente React: ClienteForm.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de ClienteForm
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente ClienteForm.
+ */
 export default function ClienteForm({ onSubmit, loading, initial = {} }) {
   const [form, setForm] = useState({ ...initialState, ...initial });
   const [errors, setErrors] = useState({});

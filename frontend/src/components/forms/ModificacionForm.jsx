@@ -11,6 +11,15 @@ const initialState = {
   empleadoId: '',
 };
 
+/**
+ * Componente React: ModificacionForm.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de ModificacionForm
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente ModificacionForm.
+ */
 export default function ModificacionForm({ onSubmit, loading, vehiculos = [], empleados = [], defaultVehiculoId = '' }) {
   const [form, setForm] = useState({ ...initialState, vehiculoId: defaultVehiculoId });
   const [errors, setErrors] = useState({});

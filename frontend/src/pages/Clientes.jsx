@@ -6,8 +6,19 @@ import StatusBadge from '../components/ui/StatusBadge';
 import ClienteForm from '../components/forms/ClienteForm';
 import Spinner from '../components/ui/Spinner';
 import { listarClientes, crearCliente, actualizarCliente, eliminarCliente } from '../api/clientes';
+import { useAuth } from '../context/AuthContext';
 
+/**
+ * Componente React: Clientes.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de Clientes
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente Clientes.
+ */
 export default function Clientes({ toast }) {
+  const { user } = useAuth();
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -135,15 +146,17 @@ export default function Clientes({ toast }) {
               >
                 <Edit2 size={14} />
               </button>
-              <button
-                id={`btn-eliminar-cliente-${row.id}`}
-                className="btn btn-danger btn-sm btn-icon"
-                onClick={() => setConfirmDelete(row)}
-                title="Dar de baja"
-                aria-label={`Eliminar ${row.nombre}`}
-              >
-                <Trash2 size={14} />
-              </button>
+              {user?.rol === 'ADMIN' && (
+                <button
+                  id={`btn-eliminar-cliente-${row.id}`}
+                  className="btn btn-danger btn-sm btn-icon"
+                  onClick={() => setConfirmDelete(row)}
+                  title="Dar de baja"
+                  aria-label={`Eliminar ${row.nombre}`}
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
             </>
           )}
         />

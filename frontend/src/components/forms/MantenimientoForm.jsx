@@ -12,6 +12,15 @@ const initialState = {
   empleadoId: '',
 };
 
+/**
+ * Componente React: MantenimientoForm.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de MantenimientoForm
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente MantenimientoForm.
+ */
 export default function MantenimientoForm({ onSubmit, loading, vehiculos = [], empleados = [], defaultVehiculoId = '' }) {
   const [form, setForm] = useState({ ...initialState, vehiculoId: defaultVehiculoId });
   const [errors, setErrors] = useState({});

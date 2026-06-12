@@ -1,6 +1,15 @@
 import { useState, useMemo } from 'react';
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, Inbox } from 'lucide-react';
 
+/**
+ * Componente React: DataTable.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de DataTable
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente DataTable.
+ */
 export default function DataTable({
   title,
   columns,

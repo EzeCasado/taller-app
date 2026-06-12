@@ -8,6 +8,7 @@ import ezecasado.tallerapp.service.ModificacionService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
@@ -44,6 +45,7 @@ public class ModificacionControllerTest {
     // ─── POST /api/modificaciones/crear ──────────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /crear: responde 201 CREATED al registrar una modificación válida")
     public void debeCrearModificacionYDocumentar() throws Exception {
 
@@ -92,8 +94,9 @@ public class ModificacionControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /crear: lanza ServletException cuando el vehículo asociado no existe")
-    public void debeRechazarModificacionConVehiculoInexistente() {
+    public void debeRechazarModificacionConVehiculoInexistente() throws Exception {
 
         // GIVEN
         Modificacion modSinVehiculo = new Modificacion();
@@ -103,21 +106,19 @@ public class ModificacionControllerTest {
         modSinVehiculo.setSigueInstalada(true);
 
         when(modificacionService.crearModificacion(any(Modificacion.class)))
-                .thenThrow(new IllegalArgumentException("Vehiculo no encontrado en el sistema"));
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException("Vehiculo no encontrado en el sistema"));
 
         // WHEN & THEN
-        Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(post("/api/modificaciones/crear")
+        mockMvc.perform(post("/api/modificaciones/crear")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(modSinVehiculo)));
-                }
-        );
+                            .content(objectMapper.writeValueAsString(modSinVehiculo)))
+                .andExpect(status().is4xxClientError());
     }
 
     // ─── GET /api/modificaciones/vehiculo/{id} → snippet: "listar-modificaciones"
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /vehiculo/{id}: responde 200 OK con las modificaciones del vehículo")
     public void debeListarModificacionesPorVehiculoYDocumentar() throws Exception {
 
@@ -149,6 +150,7 @@ public class ModificacionControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /vehiculo/{id}: responde 200 OK con lista vacía si el vehículo no tiene modificaciones")
     public void debeRetornarListaVaciaCuandoVehiculoSinModificaciones() throws Exception {
 
@@ -166,6 +168,7 @@ public class ModificacionControllerTest {
     // ─── DELETE /api/modificaciones/eliminar/{id} ────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("DELETE /eliminar/{id}: responde 200 OK al dar de baja una modificación existente")
     public void debeEliminarModificacionYDocumentar() throws Exception {
 
@@ -180,18 +183,16 @@ public class ModificacionControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("DELETE /eliminar/{id}: lanza ServletException cuando la modificación no existe")
-    public void debeLanzarExcepcionAlEliminarModificacionInexistente() {
+    public void debeLanzarExcepcionAlEliminarModificacionInexistente() throws Exception {
 
         // GIVEN
-        doThrow(new RuntimeException("Modificación no encontrada con el ID: 99"))
+        doThrow(new ezecasado.tallerapp.exception.ResourceNotFoundException("Modificación no encontrada con el ID: 99"))
                 .when(modificacionService).eliminarModificacion(99L);
 
         // WHEN & THEN
-        Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(delete("/api/modificaciones/eliminar/{id}", 99L));
-                }
-        );
+        mockMvc.perform(delete("/api/modificaciones/eliminar/{id}", 99L))
+                .andExpect(status().is4xxClientError());
     }
 }

@@ -61,8 +61,8 @@ class ClienteServiceTest {
 
         // WHEN / THEN
         assertThatThrownBy(() -> clienteService.registrarCliente(clienteValido))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("El email ya existe en el sistema");
+                .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class)
+                .hasMessage("El email juan@mail.com ya existe en el sistema");
 
         // Verificamos que NUNCA intentó guardar
         verify(clienteRepository, never()).save(any());

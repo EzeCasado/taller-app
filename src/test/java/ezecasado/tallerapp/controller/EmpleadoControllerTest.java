@@ -6,6 +6,7 @@ import ezecasado.tallerapp.service.EmpleadoService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
@@ -13,6 +14,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
@@ -35,12 +37,16 @@ public class EmpleadoControllerTest {
 
     @MockitoBean
     private EmpleadoService empleadoService;
+    @MockitoBean
+    private PasswordEncoder passwordEncoder;
+
     @Autowired
     private ObjectMapper objectMapper;
 
     // ─── POST /api/empleados/crear ────────────────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /crear: responde 201 CREATED al registrar un empleado válido")
     public void debeCrearEmpleadoYDocumentar() throws Exception {
 
@@ -51,6 +57,7 @@ public class EmpleadoControllerTest {
         empleadoGuardado.setId(1L);
 
         when(empleadoService.crearEmpleado(any(Empleado.class))).thenReturn(empleadoGuardado);
+        when(passwordEncoder.encode(anyString())).thenReturn("hashed_password");
 
         // WHEN & THEN
         mockMvc.perform(post("/api/empleados/crear")
@@ -65,29 +72,27 @@ public class EmpleadoControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /crear: lanza ServletException cuando el nombre de usuario ya existe")
-    public void debeRechazarEmpleadoConUsuarioDuplicado() {
+    public void debeRechazarEmpleadoConUsuarioDuplicado() throws Exception {
 
         // GIVEN
         Empleado empleadoDuplicado = new Empleado("Otro nombre", "carlitos", "otrapass");
 
         when(empleadoService.crearEmpleado(any(Empleado.class)))
-                .thenThrow(new IllegalArgumentException("El usuario ya existe en el sistema"));
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException("El usuario ya existe en el sistema"));
 
         // WHEN & THEN
-        jakarta.servlet.ServletException exception = Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(post("/api/empleados/crear")
+        mockMvc.perform(post("/api/empleados/crear")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(empleadoDuplicado)));
-                }
-        );
-        Assertions.assertTrue(exception.getCause().getMessage().contains("El usuario ya existe en el sistema"));
+                            .content(objectMapper.writeValueAsString(empleadoDuplicado)))
+                .andExpect(status().is4xxClientError());
     }
 
     // ─── GET /api/empleados (listar todos los activos) ────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /: responde 200 OK con la lista de empleados activos")
     public void debeListarEmpleadosActivosYDocumentar() throws Exception {
 
@@ -107,6 +112,7 @@ public class EmpleadoControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /: responde 200 OK con lista vacía cuando no hay empleados activos")
     public void debeRetornarListaVaciaCuandoNoHayEmpleadosActivos() throws Exception {
 
@@ -124,6 +130,7 @@ public class EmpleadoControllerTest {
     // ─── GET /api/empleados/{id} ──────────────────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /{id}: responde 200 OK con el empleado encontrado")
     public void debeBuscarEmpleadoPorIdYDocumentar() throws Exception {
 
@@ -143,25 +150,23 @@ public class EmpleadoControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /{id}: lanza ServletException cuando el empleado no existe")
-    public void debeLanzarExcepcionCuandoEmpleadoNoExiste() {
+    public void debeLanzarExcepcionCuandoEmpleadoNoExiste() throws Exception {
 
         // GIVEN
         when(empleadoService.buscarEmpleadoPorId(99L))
-                .thenThrow(new RuntimeException("Empleado no encontrado con id: 99"));
+                .thenThrow(new ezecasado.tallerapp.exception.ResourceNotFoundException("Empleado no encontrado con id: 99"));
 
         // WHEN & THEN
-        jakarta.servlet.ServletException exception = Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(get("/api/empleados/{id}", 99L));
-                }
-        );
-        Assertions.assertTrue(exception.getCause().getMessage().contains("Empleado no encontrado con id: 99"));
+        mockMvc.perform(get("/api/empleados/{id}", 99L))
+                .andExpect(status().is4xxClientError());
     }
 
     // ─── PUT /api/empleados/actualizar/{id} ───────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("PUT /actualizar/{id}: responde 200 OK al actualizar un empleado existente")
     public void debeActualizarEmpleadoYDocumentar() throws Exception {
 
@@ -175,6 +180,7 @@ public class EmpleadoControllerTest {
         empleadoActualizado.setId(1L);
 
         when(empleadoService.buscarEmpleadoPorId(1L)).thenReturn(empleadoExistente);
+        when(passwordEncoder.encode(anyString())).thenReturn("hashed_password");
         when(empleadoService.actualizarEmpleado(any(Empleado.class))).thenReturn(empleadoActualizado);
 
         // WHEN & THEN
@@ -189,29 +195,27 @@ public class EmpleadoControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("PUT /actualizar/{id}: lanza ServletException cuando el empleado a actualizar no existe")
-    public void debeLanzarExcepcionAlActualizarEmpleadoInexistente() {
+    public void debeLanzarExcepcionAlActualizarEmpleadoInexistente() throws Exception {
 
         // GIVEN
         Empleado datosNuevos = new Empleado("Fantasma", "ghost", "pass");
 
         when(empleadoService.buscarEmpleadoPorId(99L))
-                .thenThrow(new RuntimeException("Empleado no encontrado con id: 99"));
+                .thenThrow(new ezecasado.tallerapp.exception.ResourceNotFoundException("Empleado no encontrado con id: 99"));
 
         // WHEN & THEN
-        jakarta.servlet.ServletException exception = Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(put("/api/empleados/actualizar/{id}", 99L)
+        mockMvc.perform(put("/api/empleados/actualizar/{id}", 99L)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(datosNuevos)));
-                }
-        );
-        Assertions.assertTrue(exception.getCause().getMessage().contains("Empleado no encontrado con id: 99"));
+                            .content(objectMapper.writeValueAsString(datosNuevos)))
+                .andExpect(status().is4xxClientError());
     }
 
     // ─── DELETE /api/empleados/eliminar/{id} ──────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("DELETE /eliminar/{id}: responde 200 OK al dar de baja un empleado existente")
     public void debeEliminarEmpleadoYDocumentar() throws Exception {
 
@@ -226,19 +230,16 @@ public class EmpleadoControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("DELETE /eliminar/{id}: lanza ServletException cuando el empleado no existe")
-    public void debeLanzarExcepcionAlEliminarEmpleadoInexistente() {
+    public void debeLanzarExcepcionAlEliminarEmpleadoInexistente() throws Exception {
 
         // GIVEN
-        doThrow(new RuntimeException("Empleado no encontrado con id: 99"))
+        doThrow(new ezecasado.tallerapp.exception.ResourceNotFoundException("Empleado no encontrado con id: 99"))
                 .when(empleadoService).eliminarEmpleado(99L);
 
         // WHEN & THEN
-        jakarta.servlet.ServletException exception = Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(delete("/api/empleados/eliminar/{id}", 99L));
-                }
-        );
-        Assertions.assertTrue(exception.getCause().getMessage().contains("Empleado no encontrado con id: 99"));
+        mockMvc.perform(delete("/api/empleados/eliminar/{id}", 99L))
+                .andExpect(status().is4xxClientError());
     }
 }

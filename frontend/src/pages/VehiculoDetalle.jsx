@@ -19,6 +19,15 @@ import { listarEmpleados } from '../api/empleados';
 const formatCurrency = (val) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(val ?? 0);
 
+/**
+ * Componente React: VehiculoDetalle.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de VehiculoDetalle
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente VehiculoDetalle.
+ */
 export default function VehiculoDetalle({ toast }) {
   const { id } = useParams();
   const navigate = useNavigate();

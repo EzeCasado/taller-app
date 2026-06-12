@@ -88,8 +88,8 @@ class MantenimientoServiceTest {
 
         // WHEN / THEN
         assertThatThrownBy(() -> mantenimientoService.agregarMantenimiento(mantenimientoValido))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Vehiculo no encontrado en el sistema");
+                .isInstanceOf(ezecasado.tallerapp.exception.ResourceNotFoundException.class)
+                .hasMessageContaining("No se puede registrar el mantenimiento porque el vehiculo con el id: 1 no existe");
 
         verify(mantenimientoRepository, never()).save(any());
     }
@@ -150,7 +150,7 @@ class MantenimientoServiceTest {
 
         // WHEN / THEN
         assertThatThrownBy(() -> mantenimientoService.eliminarMantenimiento(99L))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ezecasado.tallerapp.exception.ResourceNotFoundException.class)
                 .hasMessageContaining("No existe el mantenimiento con el id: 99");
 
         verify(mantenimientoRepository, never()).save(any());

@@ -13,6 +13,15 @@ const formatDate = (d) => {
   return new Date(d).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
+/**
+ * Componente React: Dashboard.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de Dashboard
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente Dashboard.
+ */
 export default function Dashboard() {
   const [clientes, setClientes] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);

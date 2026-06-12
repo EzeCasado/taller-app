@@ -6,6 +6,15 @@ const icons = {
   warning: <AlertTriangle size={18} color="var(--warning)" />,
 };
 
+/**
+ * Componente React: Toast.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de Toast
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente Toast.
+ */
 export default function Toast({ toasts, onRemove }) {
   return (
     <div className="toast-container" aria-live="polite" aria-label="Notificaciones">

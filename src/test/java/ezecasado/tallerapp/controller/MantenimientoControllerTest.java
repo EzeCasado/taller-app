@@ -8,6 +8,7 @@ import ezecasado.tallerapp.service.MantenimientoService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
@@ -44,6 +45,7 @@ public class MantenimientoControllerTest {
     // ─── POST /api/mantenimientos/crear → snippet: "registrar-mantenimiento" ─
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /crear: responde 201 CREATED al registrar un mantenimiento válido")
     public void debeRegistrarMantenimientoYDocumentar() throws Exception {
 
@@ -95,8 +97,9 @@ public class MantenimientoControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /crear: lanza ServletException cuando el vehículo asociado no existe")
-    public void debeRechazarMantenimientoConVehiculoInexistente() {
+    public void debeRechazarMantenimientoConVehiculoInexistente() throws Exception {
 
         // GIVEN
         Mantenimiento manSinVehiculo = new Mantenimiento();
@@ -106,21 +109,19 @@ public class MantenimientoControllerTest {
         manSinVehiculo.setComentario("Revisión completa");
 
         when(mantenimientoService.agregarMantenimiento(any(Mantenimiento.class)))
-                .thenThrow(new IllegalArgumentException("Vehiculo no encontrado en el sistema"));
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException("Vehiculo no encontrado en el sistema"));
 
         // WHEN & THEN
-        Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(post("/api/mantenimientos/crear")
+        mockMvc.perform(post("/api/mantenimientos/crear")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(manSinVehiculo)));
-                }
-        );
+                            .content(objectMapper.writeValueAsString(manSinVehiculo)))
+                .andExpect(status().is4xxClientError());
     }
 
     // ─── GET /api/mantenimientos/vehiculo/{id} ────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /vehiculo/{id}: responde 200 OK con el historial del vehículo")
     public void debeObtenerHistorialMantenimientoYDocumentar() throws Exception {
 
@@ -150,6 +151,7 @@ public class MantenimientoControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /vehiculo/{id}: responde 200 OK con lista vacía si el vehículo no tiene historial")
     public void debeRetornarListaVaciaCuandoVehiculoSinHistorial() throws Exception {
 
@@ -167,6 +169,7 @@ public class MantenimientoControllerTest {
     // ─── DELETE /api/mantenimientos/eliminar/{id} ─────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("DELETE /eliminar/{id}: responde 200 OK al dar de baja un mantenimiento existente")
     public void debeEliminarMantenimientoYDocumentar() throws Exception {
 
@@ -181,18 +184,16 @@ public class MantenimientoControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("DELETE /eliminar/{id}: lanza ServletException cuando el mantenimiento no existe")
-    public void debeLanzarExcepcionAlEliminarMantenimientoInexistente() {
+    public void debeLanzarExcepcionAlEliminarMantenimientoInexistente() throws Exception {
 
         // GIVEN
-        doThrow(new IllegalArgumentException("No existe el mantenimiento con el id: 99"))
+        doThrow(new org.springframework.dao.DataIntegrityViolationException("No existe el mantenimiento con el id: 99"))
                 .when(mantenimientoService).eliminarMantenimiento(99L);
 
         // WHEN & THEN
-        Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(delete("/api/mantenimientos/eliminar/{id}", 99L));
-                }
-        );
+        mockMvc.perform(delete("/api/mantenimientos/eliminar/{id}", 99L))
+                .andExpect(status().is4xxClientError());
     }
 }

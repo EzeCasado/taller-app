@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Trash2, Eye, Car, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import DataTable from '../components/ui/DataTable';
 import Modal from '../components/ui/Modal';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -9,7 +10,17 @@ import Spinner from '../components/ui/Spinner';
 import { listarVehiculos, crearVehiculo, eliminarVehiculo } from '../api/vehiculos';
 import { listarClientes } from '../api/clientes';
 
+/**
+ * Componente React: Vehiculos.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de Vehiculos
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente Vehiculos.
+ */
 export default function Vehiculos({ toast }) {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [vehiculos, setVehiculos] = useState([]);
   const [clientes, setClientes] = useState([]);
@@ -134,15 +145,17 @@ export default function Vehiculos({ toast }) {
               >
                 <Eye size={14} />
               </button>
-              <button
-                id={`btn-eliminar-vehiculo-${row.id}`}
-                className="btn btn-danger btn-sm btn-icon"
-                onClick={() => setConfirmDelete(row)}
-                title="Dar de baja"
-                aria-label={`Eliminar ${row.patente}`}
-              >
-                <Trash2 size={14} />
-              </button>
+              {user?.rol === 'ADMIN' && (
+                <button
+                  id={`btn-eliminar-vehiculo-${row.id}`}
+                  className="btn btn-danger btn-sm btn-icon"
+                  onClick={() => setConfirmDelete(row)}
+                  title="Dar de baja"
+                  aria-label={`Eliminar ${row.patente}`}
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
             </>
           )}
         />

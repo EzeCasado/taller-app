@@ -11,6 +11,15 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 
 @Service
+/**
+ * Clase: CustomUserDetailsService.
+ * 
+ * Esta clase es responsable de proveer las funcionalidades relacionadas con CustomUserDetailsService
+ * dentro del dominio de la aplicación.
+ * 
+ * @author EzeCasado
+ * @version 1.0
+ */
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final EmpleadoRepository empleadoRepository;
@@ -31,7 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new User(
                 empleado.getUsuario(),
                 empleado.getContrasenia(),
-                Collections.emptyList() // Roles o autoridades
+                org.springframework.security.core.authority.AuthorityUtils.createAuthorityList("ROLE_" + empleado.getRol().name())
         );
     }
 }

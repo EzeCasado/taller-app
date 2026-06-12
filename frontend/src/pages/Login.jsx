@@ -5,6 +5,15 @@ import { saveCredentials } from '../api/axiosConfig';
 import api from '../api/axiosConfig';
 import '../styles/login.css';
 
+/**
+ * Componente React: Login.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de Login
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente Login.
+ */
 export default function Login() {
   const { login } = useAuth();
   const [form, setForm] = useState({ usuario: '', contrasenia: '' });
@@ -30,14 +39,8 @@ export default function Login() {
 
     try {
       saveCredentials(form.usuario, form.contrasenia);
-      // Validar las credenciales contra la BD haciendo un request.
-      const res = await api.get('/empleados');
-      const empleados = res.data;
-      const empleado = empleados.find(
-        (e) => e.usuario?.toLowerCase() === form.usuario.toLowerCase()
-      );
-      const nombre = empleado?.nombre ?? form.usuario;
-      login(form.usuario, nombre);
+      // login() ahora hace el fetch a /me para validar y obtener nombre y rol
+      await login(form.usuario, form.usuario);
     } catch (err) {
       sessionStorage.removeItem('taller_credentials');
       if (err.message?.includes('401') || err.message?.toLowerCase().includes('unauthorized')) {

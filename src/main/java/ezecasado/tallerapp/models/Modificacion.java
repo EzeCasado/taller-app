@@ -7,6 +7,15 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "modificacion")
+/**
+ * Clase: Modificacion.
+ * 
+ * Esta clase es responsable de proveer las funcionalidades relacionadas con Modificacion
+ * dentro del dominio de la aplicación.
+ * 
+ * @author EzeCasado
+ * @version 1.0
+ */
 public class Modificacion {
 
     @Id

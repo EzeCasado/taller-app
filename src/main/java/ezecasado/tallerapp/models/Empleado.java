@@ -5,6 +5,15 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "empleado")
+/**
+ * Clase: Empleado.
+ * 
+ * Esta clase es responsable de proveer las funcionalidades relacionadas con Empleado
+ * dentro del dominio de la aplicación.
+ * 
+ * @author EzeCasado
+ * @version 1.0
+ */
 public class Empleado {
 
 
@@ -23,14 +32,25 @@ public class Empleado {
 
     private Boolean activo;
 
-    public Empleado(String nombre, String usuario, String contrasenia) {
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Rol rol;
 
+    public Empleado(String nombre, String usuario, String contrasenia, Rol rol) {
         this.nombre = nombre;
         this.usuario = usuario;
         this.contrasenia = contrasenia;
         this.activo = true;
+        this.rol = rol;
+    }
 
-
+    // Constructor sobrecargado para compatibilidad con tests
+    public Empleado(String nombre, String usuario, String contrasenia) {
+        this.nombre = nombre;
+        this.usuario = usuario;
+        this.contrasenia = contrasenia;
+        this.activo = true;
+        this.rol = Rol.ADMIN; // Por defecto para los tests
     }
 
 
@@ -74,6 +94,14 @@ public class Empleado {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Rol getRol() {
+        return rol;
+    }
+
+    public void setRol(Rol rol) {
+        this.rol = rol;
     }
 
 }

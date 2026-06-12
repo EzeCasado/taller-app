@@ -11,6 +11,7 @@ import { listarVehiculos } from '../api/vehiculos';
 import { listarMantenimientosPorVehiculo, crearMantenimiento, eliminarMantenimiento } from '../api/mantenimientos';
 import { listarModificacionesPorVehiculo, crearModificacion, eliminarModificacion } from '../api/modificaciones';
 import { listarEmpleados } from '../api/empleados';
+import { useAuth } from '../context/AuthContext';
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(val ?? 0);
@@ -18,7 +19,17 @@ const formatCurrency = (val) =>
 const formatDate = (d) =>
   d ? new Date(d).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
+/**
+ * Componente React: Mantenimientos.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de Mantenimientos
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente Mantenimientos.
+ */
 export default function Mantenimientos({ toast }) {
+  const { user } = useAuth();
   const [vehiculos, setVehiculos] = useState([]);
   const [empleados, setEmpleados] = useState([]);
   const [selectedVehiculo, setSelectedVehiculo] = useState('');
@@ -230,14 +241,16 @@ export default function Mantenimientos({ toast }) {
           searchKeys={['_nombre', '_type']}
           emptyText="Sin registros para este vehículo"
           actions={(row) => (
-            <button
-              id={`btn-eliminar-registro-${row._type}-${row.id}`}
-              className="btn btn-danger btn-sm btn-icon"
-              onClick={() => setConfirmDelete({ id: row.id, type: row._type === 'Mantenimiento' ? 'mantenimiento' : 'modificacion' })}
-              aria-label="Eliminar registro"
-            >
-              <Trash2 size={14} />
-            </button>
+            user?.rol === 'ADMIN' ? (
+              <button
+                id={`btn-eliminar-registro-${row._type}-${row.id}`}
+                className="btn btn-danger btn-sm btn-icon"
+                onClick={() => setConfirmDelete({ id: row.id, type: row._type === 'Mantenimiento' ? 'mantenimiento' : 'modificacion' })}
+                aria-label="Eliminar registro"
+              >
+                <Trash2 size={14} />
+              </button>
+            ) : null
           )}
         />
       )}

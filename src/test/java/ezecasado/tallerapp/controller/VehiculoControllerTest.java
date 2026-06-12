@@ -7,6 +7,7 @@ import ezecasado.tallerapp.models.Vehiculo;
 import ezecasado.tallerapp.service.VehiculoService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
@@ -42,6 +43,7 @@ public class VehiculoControllerTest {
     // ─── GET /api/vehiculos/listar ────────────────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /listar: responde 200 OK con la lista de vehículos activos")
     public void debeListarVehiculosActivosYDocumentar() throws Exception {
 
@@ -76,6 +78,7 @@ public class VehiculoControllerTest {
     // ─── POST /api/vehiculos/crear ────────────────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /crear: responde 201 CREATED al registrar un vehículo válido")
     public void debeCrearVehiculoYDocumentar() throws Exception {
 
@@ -118,8 +121,9 @@ public class VehiculoControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("POST /crear: lanza ServletException cuando la patente ya existe")
-    public void debeRechazarVehiculoConPatenteDuplicada() {
+    public void debeRechazarVehiculoConPatenteDuplicada() throws Exception {
 
         // GIVEN
         Vehiculo vehiculoDuplicado = new Vehiculo();
@@ -129,21 +133,19 @@ public class VehiculoControllerTest {
         vehiculoDuplicado.setMotor("1.4L");
 
         when(vehiculoService.crearVehiculo(any(Vehiculo.class)))
-                .thenThrow(new IllegalArgumentException("Patente ya existe en el sistema"));
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException("Patente ya existe en el sistema"));
 
         // WHEN & THEN
-        org.junit.jupiter.api.Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(post("/api/vehiculos/crear")
+        mockMvc.perform(post("/api/vehiculos/crear")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(vehiculoDuplicado)));
-                }
-        );
+                            .content(objectMapper.writeValueAsString(vehiculoDuplicado)))
+                .andExpect(status().is4xxClientError());
     }
 
     // ─── GET /api/vehiculos/{id}/gastos ───────────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /{id}/gastos: responde 200 OK con el resumen de gastos del vehículo")
     public void debeObtenerGastosVehiculoYDocumentar() throws Exception {
 
@@ -168,6 +170,7 @@ public class VehiculoControllerTest {
     // ─── DELETE /api/vehiculos/eliminar/{id} ──────────────────────────────────
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("DELETE /eliminar/{id}: responde 200 OK al dar de baja un vehículo existente")
     public void debeEliminarVehiculoYDocumentar() throws Exception {
 
@@ -182,18 +185,16 @@ public class VehiculoControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("DELETE /eliminar/{id}: lanza ServletException cuando el vehículo no existe")
-    public void debeLanzarExcepcionAlEliminarVehiculoInexistente() {
+    public void debeLanzarExcepcionAlEliminarVehiculoInexistente() throws Exception {
 
         // GIVEN
-        doThrow(new RuntimeException("Vehiculo no encontrado con el id99"))
+        doThrow(new ezecasado.tallerapp.exception.ResourceNotFoundException("Vehiculo no encontrado con el id99"))
                 .when(vehiculoService).eliminarVehiculo(99L);
 
         // WHEN & THEN
-        org.junit.jupiter.api.Assertions.assertThrows(
-                jakarta.servlet.ServletException.class, () -> {
-                    mockMvc.perform(delete("/api/vehiculos/eliminar/{id}", 99L));
-                }
-        );
+        mockMvc.perform(delete("/api/vehiculos/eliminar/{id}", 99L))
+                .andExpect(status().is4xxClientError());
     }
 }

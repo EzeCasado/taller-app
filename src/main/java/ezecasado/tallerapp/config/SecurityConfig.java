@@ -19,6 +19,16 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
+/**
+ * Clase: SecurityConfig.
+ * 
+ * Esta clase es responsable de proveer las funcionalidades relacionadas con SecurityConfig
+ * dentro del dominio de la aplicación.
+ * 
+ * @author EzeCasado
+ * @version 1.0
+ */
 public class SecurityConfig {
 
     @Bean
@@ -32,6 +42,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Permitimos que el frontend consulte el estado (CORS Pre-flight) sin trabas
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Permitimos acceso público a Swagger y a la documentación de OpenAPI
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // El resto de la API requiere usuario y contraseña
                         .anyRequest().authenticated()
                 )

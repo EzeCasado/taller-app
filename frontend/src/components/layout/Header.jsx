@@ -10,6 +10,15 @@ const routeTitles = {
   '/empleados': { title: 'Empleados', subtitle: 'Gestión del equipo de trabajo' },
 };
 
+/**
+ * Componente React: Header.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de Header
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente Header.
+ */
 export default function Header({ onRefresh }) {
   const { pathname } = useLocation();
   const { user } = useAuth();

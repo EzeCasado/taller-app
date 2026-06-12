@@ -11,6 +11,15 @@ const initialState = {
   clienteId: '',
 };
 
+/**
+ * Componente React: VehiculoForm.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de VehiculoForm
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente VehiculoForm.
+ */
 export default function VehiculoForm({ onSubmit, loading, clientes = [] }) {
   const [form, setForm] = useState(initialState);
   const [errors, setErrors] = useState({});

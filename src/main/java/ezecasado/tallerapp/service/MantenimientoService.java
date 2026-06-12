@@ -1,6 +1,7 @@
 package ezecasado.tallerapp.service;
 
 
+import ezecasado.tallerapp.exception.ResourceNotFoundException;
 import ezecasado.tallerapp.models.Mantenimiento;
 import ezecasado.tallerapp.models.Vehiculo;
 import ezecasado.tallerapp.repository.MantenimientoRepository;
@@ -10,6 +11,15 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+/**
+ * Clase: MantenimientoService.
+ * 
+ * Esta clase es responsable de proveer las funcionalidades relacionadas con MantenimientoService
+ * dentro del dominio de la aplicación.
+ * 
+ * @author EzeCasado
+ * @version 1.0
+ */
 public class MantenimientoService {
 
 
@@ -26,7 +36,8 @@ public class MantenimientoService {
 
         if(vehiculoRepository.findById(mantenimiento.getVehiculo().getId()).isEmpty()){
 
-            throw new IllegalArgumentException("Vehiculo no encontrado en el sistema");
+            throw new ResourceNotFoundException("No se puede registrar el mantenimiento porque el vehiculo con el id: "
+            + mantenimiento.getVehiculo().getId() + " no existe en el sistema");
 
 
         }
@@ -46,7 +57,7 @@ public class MantenimientoService {
     public void eliminarMantenimiento(Long id){
 
         Mantenimiento mantenimiento = mantenimientoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("No existe el mantenimiento con el id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el mantenimiento con el id: " + id));
 
 
         mantenimiento.setActivo(false);

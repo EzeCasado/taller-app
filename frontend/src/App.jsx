@@ -15,7 +15,7 @@ import { useToast } from './hooks/useToast';
 
 // Componente interno que ya tiene acceso al AuthContext
 function AppRoutes() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { toasts, addToast, removeToast } = useToast();
   const toast = useCallback(addToast, [addToast]);
 
@@ -40,7 +40,10 @@ function AppRoutes() {
                   <Route path="/vehiculos" element={<Vehiculos toast={toast} />} />
                   <Route path="/vehiculos/:id" element={<VehiculoDetalle toast={toast} />} />
                   <Route path="/mantenimientos" element={<Mantenimientos toast={toast} />} />
-                  <Route path="/empleados" element={<Empleados toast={toast} />} />
+                  <Route 
+                    path="/empleados" 
+                    element={user?.rol === 'ADMIN' ? <Empleados toast={toast} /> : <Navigate to="/" replace />} 
+                  />
                   {/* Catch-all → dashboard */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
@@ -55,6 +58,15 @@ function AppRoutes() {
   );
 }
 
+/**
+ * Componente React: App.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de App
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente App.
+ */
 export default function App() {
   return (
     <BrowserRouter>

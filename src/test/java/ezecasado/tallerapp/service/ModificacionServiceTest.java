@@ -4,6 +4,7 @@ import ezecasado.tallerapp.models.Empleado;
 import ezecasado.tallerapp.models.Modificacion;
 import ezecasado.tallerapp.models.Vehiculo;
 import ezecasado.tallerapp.repository.ModificacionRepository;
+import ezecasado.tallerapp.repository.vehiculoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,9 @@ class ModificacionServiceTest {
 
     @Mock
     private ModificacionRepository modificacionRepository;
+
+    @Mock
+    private vehiculoRepository vehiculoRepository;
 
     @InjectMocks
     private ModificacionService modificacionService;
@@ -60,6 +64,7 @@ class ModificacionServiceTest {
     @DisplayName("crearModificacion: guarda y retorna la modificación")
     void crearModificacion_datosValidos_guardaYRetorna() {
         // GIVEN
+        when(vehiculoRepository.existsById(any())).thenReturn(false);
         when(modificacionRepository.save(modificacionValida)).thenReturn(modificacionValida);
 
         // WHEN
@@ -77,6 +82,7 @@ class ModificacionServiceTest {
     @DisplayName("crearModificacion: la modificación nueva tiene sigueInstalada = true")
     void crearModificacion_nueva_sigueInstaladaEsTrue() {
         // GIVEN
+        when(vehiculoRepository.existsById(any())).thenReturn(false);
         when(modificacionRepository.save(any())).thenReturn(modificacionValida);
 
         // WHEN

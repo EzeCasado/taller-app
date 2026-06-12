@@ -18,6 +18,15 @@ const navItems = [
   { to: '/empleados', label: 'Empleados', icon: UserCog },
 ];
 
+/**
+ * Componente React: Sidebar.
+ * 
+ * Este componente es responsable de renderizar y gestionar la vista de Sidebar
+ * dentro de la aplicación. Maneja su propio estado local y propiedades.
+ * 
+ * @param {Object} props - Propiedades pasadas al componente.
+ * @returns {JSX.Element} El elemento renderizado del componente Sidebar.
+ */
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -49,21 +58,24 @@ export default function Sidebar() {
       <div className="sidebar-nav">
         <span className="sidebar-section-label">Menú</span>
 
-        {navItems.map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            id={`nav-${label.toLowerCase().replace(/\s/g, '-')}`}
-            className={({ isActive }) =>
-              `sidebar-item${isActive ? ' active' : ''}`
-            }
-            aria-label={label}
-          >
-            <Icon size={18} />
-            <span>{label}</span>
-          </NavLink>
-        ))}
+        {navItems.map(({ to, label, icon: Icon, end }) => {
+          if (to === '/empleados' && user?.rol !== 'ADMIN') return null;
+          return (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              id={`nav-${label.toLowerCase().replace(/\s/g, '-')}`}
+              className={({ isActive }) =>
+                `sidebar-item${isActive ? ' active' : ''}`
+              }
+              aria-label={label}
+            >
+              <Icon size={18} />
+              <span>{label}</span>
+            </NavLink>
+          );
+        })}
       </div>
 
       {/* Footer — usuario + logout */}
